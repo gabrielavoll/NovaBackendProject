@@ -1,7 +1,7 @@
 # NovaBackendProject
 super simple server, this server has three API calls:
 * /phase1  => accepts a GET request, requires params: country_code, account_id, routing_number, file_ext, tags
-* /phase2	 => accepts a POST request, requires both a cookie token and json body that contains: country_code, account_id, routing_number, first_name, last_name, credit_limit, credit_score
+* /phase2	 => accepts a POST request, requires both a cookie token and body file (.js or .json or .txt) that contains: country_code, account_id, routing_number, first_name, last_name, credit_limit, credit_score
 * /data/:id  => accepts GET request, displays data from successful /phase1 & /phase2 completion
 
 # How to Run

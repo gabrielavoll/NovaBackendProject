@@ -43,7 +43,7 @@ module.exports = {
         `, record
         , function(error, results) {
           if (error){
-            console.log('insert to transfer_init error', error);
+            console.log('insert to transfer error', error);
             reject(error);
           } else resolve(results.rowCount)
       });
