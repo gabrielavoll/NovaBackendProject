@@ -1,0 +1,14 @@
+{
+  "name": "NovaBackendProject",
+  "version": "1.0.0",
+  "description": "a small backend api project for Nova Credit second stage interview",
+  "main": "index.js",
+  "author": "Gabriela Voll",
+  "license": "MIT",
+  "dependencies": {
+    "pg": "",
+    "express": "",
+    "body-parser": "",
+    "cookie-parser": ""
+  }
+}
