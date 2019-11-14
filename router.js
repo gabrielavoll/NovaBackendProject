@@ -1,15 +1,18 @@
 const express = require('express');
+const fs = require('fs');
 var router = express.Router();
-var queries = require('../db/queries.js');
-const tools = require('../db/tools.js');
-
-const file_ext_to_header = { '.json': 'application/json'};
-
-function apiEndPointHolder(req, res){
-  res.status(200);
-  res.set('Content-Type', 'text/plain');
-  res.send(req.url);
-}
+var queries = require('./db/queries.js');
+const tools = require('./db/tools.js');
+const catchAllHtml = "./html/404.html";
+const filePermisiveUrls = {
+	"/": "./html/app.html",
+	"/favicon.ico": "./favicon.ico"
+};
+const file_ext_to_header = {
+	'.json': 'application/json',
+	'.js': 'application/javscript',
+	'.txt': 'text/plain'
+};
 
 function validatePhase1(req, res, next){
 	var params = req.query;
@@ -26,35 +29,37 @@ function validatePhase1(req, res, next){
 		return res.status(400).send("valid account_id is less then 10 chars")
 	if( tags.routing_number > 10)
 		return res.status(400).send("valid routing_number is less then 10 chars")
-
 	next();
 }
 
 function phase1(req, res){
-	var params = req.query;
-	var token = tools.tokenGen();
-	var newRecord = [params.file_ext, params.country_code, params.tags, token, params.account_id, params.routing_number];
+	var params = req.query, token = tools.tokenGen();
+	var newRecord = [
+		params.file_ext,
+		params.country_code,
+		params.tags, token,
+		params.account_id,
+		params.routing_number
+	];
 	queries.createTransferInitRecord(newRecord)
 		.catch( err => {
 			return res.status(500).send("Failed to save /phase1 data");
 		}).then( response => {
 			if( response == 1)  {
 				// 5 min cookie
-				res.cookie('token',token, { maxAge: 1000 * 60 * 5, httpOnly: false })
+				res.cookie('token',token, { maxAge: 1000 * 60 * 5, httpOnly: true })
 				return res.status(200).send('success: proceed to /phase2')
 			} else return res.status(500).send("Failed to save /phase1 data");
 		});
 }
 
 function validatePhase2(req, res, next){
-	var token = req.cookies['token'] || null;
-	var body = req.body;
-
+	var token = req.cookies['token'] || null, body = req.body;
 	if( !token)
 		return res.status(400).send("cookie token is required to fulfill request /phase2, hit /phase1 first")
 	if( !body || body == {} )
 		return res.status(400).send("please uploade a file for /phase2")
-	if( !body.country_code || !body.first_name || !body.last_name || !body.account_id || !body.routing_number || !body.credit_score || !body.credit_limit )
+	if( !("country_code" in body) || !("first_name" in body) || !("last_name" in body) || !("account_id" in body) || !("routing_number" in body) || !("credit_score" in body) || !("credit_limit" in body) )
 		return res.status(400).send("document uploaded must inclue; country_code, first_name, last_name, account_id, routing_number, credit_limit, credit_score are required to fulfill request /phase1")
 	if( body.country_code.length != 3 )
 		return res.status(400).send("valid country_code is 3 chars long")
@@ -102,7 +107,6 @@ function phase2(req, res){
 		req.pendingRecord.date_t,
 		req.pendingRecord.tags
 	];
-
 	queries.createTransferRecord(newRecord)
 		.catch( err => {
 			return res.status(500).send("Failed to save new data");
@@ -125,24 +129,36 @@ function phase2(req, res){
 		});
 }
 
-
 function displayData(req, res){
 	if( parseInt(req.params.id) == NaN)
 		return res.status(400).send('data id is invalid, must be integer')
-
 	queries.getTransferRecordById(req.params.id)
 		.catch( err => {
 			return res.status(400).send("Failed to find data, with that id");
 		}).then( response => {
 			if( response && response.id == req.params.id ) return res.status(200).send(response);
-			else return res.status(400).send("Failed to find data, with that id");
+			else return res.status(400).send("Failed to find data, with id: " + req.params.id);
 		});
+}
+
+function sendFile(req, res){
+  var filename = filePermisiveUrls[req.url], responseCode = 200;
+  if( !filePermisiveUrls[req.url] ) filename = catchAllHtml, responseCode = 404;
+	fs.readFile(filename, function(err, data) {
+		if(err){
+			console.log(filename, ' not found');
+			return res.send();
+		} else {
+			res.set('Content-Type', 'text/html');
+  		return res.status(responseCode).send(data);
+		}
+	});
 }
 
 
 router.post( "/phase2", validatePhase2, phase2);
 router.get( "/phase1", validatePhase1, phase1);
-router.get( "/phase2", apiEndPointHolder);
 router.get( "/data/:id", displayData);
+router.get( "/*", sendFile);
 
 module.exports = router;

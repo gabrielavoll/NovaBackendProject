@@ -14,12 +14,12 @@
 						<h2>Welcome to NovaBackendProject</h2>
 						<p>possible urls to hit:</p>
 						<ul>
-							<li> <a href="/api/phase1">/phase1</a><br/> => here you can send up the description of the file you want to upload</li>
-							<li> <a href="/api/aphase2">/phase2</a><br/> => here you can actually upload the file if it follows the specifications sent up in phase 1</li>
-							<li> <a href="/api/data/1">/data/:id</a><br/> => here you can access the infromation that you uploaded </li>
+							<li> <a href="/phase1">/phase1</a><br/> accepts a GET request, requires params: country_code, account_id, routing_number, file_ext, tags
+							<br/> initializes a data transfer; saves a pending transfer record to db </li>
+							<li> <a href="/phase2">/phase2</a><br/> accepts a POST request, requires both a cookie token and json body that contains: country_code, account_id, routing_number, first_name, last_name, credit_limit, credit_score
+							<br/> uploads the file send POST body, if it follows the specifications sent up in /phase1, requires matching country_code, account_id, routing_number and if the cookie token matches the /phase1 record</li>
+							<li> <a href="/data/1">/data/:id</a><br/> accepts GET request, displays data from successful /phase1 & /phase2 completion</li>
 						</ul>
-						</br><br/><br/>
-						<a href="/">back to home</a>
 				</div>
 	</body>
 </html>
