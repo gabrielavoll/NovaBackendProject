@@ -8,14 +8,15 @@ super simple server, this server has three API calls:
 1. Pull down repo from Github
 2. in the terminal `run: npm install`
 	to download all the dependencies
-3. makes sure postgres is installed locally and that it is running
-4. in the terminal run: `node db/init.js`
+3. copy emailed creds.json into root directory
+4. makes sure postgres is installed locally and that it is running
+5. in the terminal run: `node db/init.js`
 	to spin up local postgres database and tables for this app
-5. we are now ready to run the app! in the terminal run:
+6. we are now ready to run the app! in the terminal run:
 	```
 	node server.js
 	```
-6. go to url `localhost:6660` in a web browers
+7. go to url `localhost:6660` in a web browers
 	you'll see a home page explainging the api calls on this mini backend server
 
 ### Question Portion
