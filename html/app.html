@@ -16,8 +16,61 @@
 						<ul>
 							<li> <a href="/phase1">/phase1</a><br/> accepts a GET request, requires params: country_code, account_id, routing_number, file_ext, tags
 							<br/> initializes a data transfer; saves a pending transfer record to db </li>
-							<li> <a href="/phase2">/phase2</a><br/> accepts a POST request, requires both a cookie token and json body that contains: country_code, account_id, routing_number, first_name, last_name, credit_limit, credit_score
+							<li> <a href="/phase2">/phase2</a><br/> accepts a POST request, requires both a cookie token generated during /phase1 and the POST body, we accept file formats: .txt, .js, .json <br/>
+							the file itself must contain: country_code, account_id, routing_number, first_name, last_name, credit_limit, credit_score
 							<br/> uploads the file send POST body, if it follows the specifications sent up in /phase1, requires matching country_code, account_id, routing_number and if the cookie token matches the /phase1 record</li>
+							<table>
+								<tr>
+									<td>.txt</td>
+									<td>.js</td>
+									<td>.json</td>
+								</tr>
+								<tr>
+									<td>account_id: 117 <br/>
+											routing_number: 300032 <br/>
+											country_code: USA <br/>
+											first_name: Lil <br/>
+											last_name: Jen <br/>
+											credit_limit: 100 <br/>
+											credit_score: 0 <br/>
+											extra_info: dlakjklda <br/>
+											extra_info1: dlakjklda <br/>
+											extra_info2: dlakjklda <br/>
+											extra_info3: dlakjklda <br/>
+											extra_info4: dlakjklda <br/>
+									</td>
+									<td>{ <br/>
+													&emsp;"account_id": "110", <br/>
+													&emsp;"routing_number": "300032", <br/>
+													&emsp;"country_code": "USA", <br/>
+													&emsp;"first_name": "Lil", <br/>
+													&emsp;"last_name": "Jen", <br/>
+													&emsp;"credit_limit": 100, <br/>
+													&emsp;"credit_score": 0, <br/>
+													&emsp;"extra_info": "dlakjklda", <br/>
+													&emsp;"extra_info1": "dlakjklda", <br/>
+													&emsp;"extra_info2": "dlakjklda", <br/>
+													&emsp;"extra_info3": "dlakjklda", <br/>
+													&emsp;"extra_info4": "dlakjklda" <br/>
+												} <br/>
+									</td>
+									<td>{ <br/>
+													&emsp;"account_id": "110", <br/>
+													&emsp;"routing_number": "300032", <br/>
+													&emsp;"country_code": "USA", <br/>
+													&emsp;"first_name": "Lil", <br/>
+													&emsp;"last_name": "Jen", <br/>
+													&emsp;"credit_limit": 100, <br/>
+													&emsp;"credit_score": 0, <br/>
+													&emsp;"extra_info": "dlakjklda", <br/>
+													&emsp;"extra_info1": "dlakjklda", <br/>
+													&emsp;"extra_info2": "dlakjklda", <br/>
+													&emsp;"extra_info3": "dlakjklda", <br/>
+													&emsp;"extra_info4": "dlakjklda" <br/>
+												} <br/>
+									</td>
+								</tr>
+							</table>
 							<li> <a href="/data/1">/data/:id</a><br/> accepts GET request, displays data from successful /phase1 & /phase2 completion</li>
 						</ul>
 				</div>

@@ -10,9 +10,26 @@ const filePermisiveUrls = {
 };
 const file_ext_to_header = {
 	'.json': 'application/json',
-	'.js': 'application/javscript',
+	'.js': 'application/javascript',
 	'.txt': 'text/plain'
 };
+
+const header_to_file_handler = {
+	'application/json': (req) => req.body,
+	'application/javascript': (req) => JSON.parse(req.rawBody),
+	'text/plain': (req) => textParser(req.rawBody)
+};
+
+function textParser(body){
+	var file = body.split("\n");
+	var obj = {};
+	for(var i =0; i< file.length; i++){
+		var key = file[i].substring(0, file[i].indexOf(':') )
+		var val = file[i].substring(file[i].indexOf(':') + 2 );
+		obj[key] = val;
+	}
+	return obj;
+}
 
 function validatePhase1(req, res, next){
 	var params = req.query;
@@ -21,8 +38,8 @@ function validatePhase1(req, res, next){
 	var tags = params.tags.split(',').filter( x => x != "");
 	if( params.country_code.length != 3 )
 		return res.status(400).send("valid country_code is 3 chars long")
-	if( params.file_ext != '.json' )
-		return res.status(400).send("the only valid file_ext is .json")
+	if( !Object.keys(file_ext_to_header).includes(params.file_ext) )
+		return res.status(400).send("the only valid file_ext are: " + Object.keys(file_ext_to_header).join(', '))
 	if( tags.length < 2 || params.tags.length > 500)
 		return res.status(400).send("you must supply at least two tag, formated as a comma seperated string, and fewer then 500 chars total")
 	if( params.account_id.length > 10 )
@@ -37,7 +54,8 @@ function phase1(req, res){
 	var newRecord = [
 		params.file_ext,
 		params.country_code,
-		params.tags, token,
+		params.tags,
+		token,
 		params.account_id,
 		params.routing_number
 	];
@@ -54,7 +72,11 @@ function phase1(req, res){
 }
 
 function validatePhase2(req, res, next){
-	var token = req.cookies['token'] || null, body = req.body;
+	var header = req.headers['content-type'];
+	var token = req.cookies['token'] || null,
+			body =  header_to_file_handler.hasOwnProperty(req.headers['content-type']) ?
+				header_to_file_handler[req.headers['content-type']](req) : req.body;
+
 	if( !token)
 		return res.status(400).send("cookie token is required to fulfill request /phase2, hit /phase1 first")
 	if( !body || body == {} )
@@ -94,7 +116,8 @@ function validatePhase2(req, res, next){
 }
 
 function phase2(req, res){
-	var body = req.body;
+	var body = header_to_file_handler.hasOwnProperty(req.headers['content-type']) ?
+				header_to_file_handler[req.headers['content-type']](req) : req.body;
 	var newRecord = [
 		req.pendingRecord.file_ext,
 		body.country_code,
